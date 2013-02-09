@@ -70,6 +70,7 @@ my $TAG_SEPARATOR_DEFAULT = '/';
 
 my @flacargs = qw (
     --decode
+    --decode-through-errors
     --stdout
     --silent
 );
