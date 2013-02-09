@@ -698,8 +698,29 @@ sub transcode_file {
 
         # Convert the file (unless we're pretending}
         my $exit_value;
+        my $flac_exit_value;
+        my $lame_exit_value;
         if ( !$Options{pretend} ) {
-            $exit_value = system($convert_command);
+            # Fire up our codecs using per directly and avoiding a
+            # shell entirely.
+            open(FLAC, "-|", $flaccmd, @flacargs, $source);
+            open(LAME, "|-", $lamecmd, @lameargs, "-", $tmpfilename);
+
+            # Since we're expected to be using only 1 CPU's time, read the
+            # entire decoded file into memory before giving anything to lame to
+            # compress. This will serialize decoding/encoding, but use more
+            # memory. Assumes your computer is not girly.
+            my $decodeddata = do { local $/; <FLAC> };
+            print LAME $decodeddata;
+
+            $flac_exit_value = close(FLAC);
+            $lame_exit_value = close(LAME);
+
+            if($flac_exit_value && $lame_exit_value){
+                $exit_value = 0;
+            }else{
+                $exit_value = 1;
+            }
         }
         else {
             $exit_value = 0;
