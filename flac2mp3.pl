@@ -165,7 +165,7 @@ $| = 1;
 my ( $source_root, $target_root ) = @ARGV;
 
 showversion() if ( $Options{version} );
-showhelp()    if ( $Options{help} );
+showusage()    if ( $Options{help} );
 showusage()
     if ( !defined $source_root
     or !defined $target_root
