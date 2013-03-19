@@ -164,7 +164,7 @@ my %Options = (
 GetOptions(
     \%Options,     "quiet!",         "tagdiff", "debug!",  "tagsonly!", "force!",
     "usage",       "help",           "version", "pretend", "skipfile!", "skipfilename=s",
-    "processes=i", "tagseparator=s", "lameargs=s", "copyfiles", "delete"
+    "processes=i", "tagseparator=s", "lameargs=s", "copyfiles", "delete", "serialize"
 );
 
 # info flag is the inverse of --quiet
@@ -890,29 +890,37 @@ sub transcode_file {
     my $flac_exit_value;
     my $lame_exit_value;
     if ( !$Options{pretend} ) {
-	# Fire up our codecs using per directly and avoiding a
-	# shell entirely.
-	open(FLAC, "-|", $flaccmd, @flacargs, $source);
-	open(LAME, "|-", $lamecmd, @lameargs, "-", $tmpfilename);
+		if ( $Options{serialize} ) {
+			# Fire up our codecs using per directly and avoiding a
+			# shell entirely.
+			open(FLAC, "-|", $flaccmd, @flacargs, $source);
+			open(LAME, "|-", $lamecmd, @lameargs, "-", $tmpfilename);
 
-	# Since we're expected to be using only 1 CPU's time, read the
-	# entire decoded file into memory before giving anything to lame to
-	# compress. This will serialize decoding/encoding, but use more
-	# memory. Assumes your computer is not girly.
-	my $decodeddata = do { local $/; <FLAC> };
-	print LAME $decodeddata;
+			# Since we're expected to be using only 1 CPU's time, read the
+			# entire decoded file into memory before giving anything to lame to
+			# compress. This will serialize decoding/encoding, but use more
+			# memory. Assumes your computer is not girly.
+			my $decodeddata = do { local $/; <FLAC> };
+			print LAME $decodeddata;
 
-	$flac_exit_value = close(FLAC);
-	$lame_exit_value = close(LAME);
+			$flac_exit_value = close(FLAC);
+			$lame_exit_value = close(LAME);
 
-	if($flac_exit_value && $lame_exit_value){
-	    $exit_value = 0;
-	}else{
-	    $exit_value = 1;
-	}
+			if ($flac_exit_value && $lame_exit_value) {
+			    $exit_value = 0;
+			}
+			else {
+				$exit_value = 1;
+			}
+			msg_info("open()");
+		}
+		else {
+		$exit_value = system($convert_command);
+		msg_info("system call");
+		}
     }
     else {
-	$exit_value = 0;
+		$exit_value = 0;
     }
 
 	$Options{debug}
