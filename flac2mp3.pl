@@ -602,7 +602,9 @@ Usage: $0 [--pretend] [--quiet] [--debug] [--tagsonly] [--force] [--tagdiff] [--
                      same tag.
                      Default: "/"
     --copyfiles      Copy non-flac files to dest directories
-    --delete         Delete surplus files and directories in destination, keeping in sync with source dir
+    --delete         Delete non-matched files and directories in destination, keeping in sync with source dir
+    
+    Example: "perl $0 --processes=6 --delete ~/FLAC/ ~/MP3/"
 EOT
     exit 0;
 }
