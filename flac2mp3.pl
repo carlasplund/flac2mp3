@@ -175,12 +175,13 @@ $| = 1;
 my ( $source_root, $target_root ) = @ARGV;
 
 showversion() if ( $Options{version} );
-showhelp()    if ( $Options{help} );
+
 showusage()
     if ( !defined $source_root
     or !defined $target_root
     or $Options{processes} < 1
-    or $Options{usage} );
+    or $Options{usage}
+    or $Options{help} );
 
 @lameargs = $Options{lameargs}
     if $Options{lameargs};
