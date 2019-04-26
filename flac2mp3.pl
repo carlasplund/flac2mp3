@@ -54,7 +54,7 @@ if ($^O eq 'MSWin32' or $^O eq 'MSWin64') {
 	# This is an example of typical Windows filepaths. 
 	# Change them if necessary:
 	$flaccmd = q|C:\Program Files (x86)\FLAC\flac.exe|;
-	$lamecmd = q|C:\Program Files\LAME\lame.exe|;
+	$lamecmd = q|C:\Program Files (x86)\LAME\lame.exe|;
 }
 else {
 	$flaccmd = 'flac';
@@ -220,7 +220,8 @@ msg_info( $pretendString . "Processing directory: $source_root" );
 # Now look for files in the source dir
 # (following symlinks)
 my %flac_mp3_files = get_all_paths('name', '.flac', $source_root, $target_root, '.mp3');
-my @flac_files = sort keys { %flac_mp3_files };
+my @flac_files = sort keys %{ flac_mp3_files };
+# my @flac_files = sort keys { %flac_mp3_files };
 	
 my $file_count = scalar @flac_files;
 msg_info( "Found $file_count flac file" . ( $file_count > 1 ? 's'  : '' . "\n" ) );
@@ -350,13 +351,13 @@ sub delete_excess_files_from_dest {
 	my %existing_target_non_mp3_files = get_all_paths('not_name', '.mp3', $target_root, $target_root, '');
 	
 	# 1. calculate what files to expect in directory after finished transcoding and copying
-	my @expected_transcoded_mp3s = keys { reverse %flac_mp3_files }; # expected mp3 files in target from transcoded flac files
-	my @expected_copied_files = keys { reverse %non_flac_files }; # expected files in target copied from non-flac files in source
+	my @expected_transcoded_mp3s = keys %{ reverse %flac_mp3_files }; # expected mp3 files in target from transcoded flac files
+	my @expected_copied_files = keys %{ reverse %non_flac_files }; # expected files in target copied from non-flac files in source
 	my @expected_files = uniq(@expected_transcoded_mp3s, @expected_copied_files); # Join the arrays and remove any duplicates 
 	
 	# 2. check what files are actually present
-	my @actual_mp3s = keys { reverse %existing_target_mp3_files }; # actual existing mp3 files in target
-	my @actual_non_mp3s = keys { reverse %existing_target_non_mp3_files }; # existing non-mp3 files in target
+	my @actual_mp3s = keys %{ reverse %existing_target_mp3_files }; # actual existing mp3 files in target
+	my @actual_non_mp3s = keys %{ reverse %existing_target_non_mp3_files }; # existing non-mp3 files in target
 	my @actual_files = (@actual_mp3s, @actual_non_mp3s); # Join the arrays (being mutually exclusive, there is no overlap) 
 	
 	# 3. determine which files to remove from target directory tree
